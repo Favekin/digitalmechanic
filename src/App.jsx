@@ -686,44 +686,7 @@ const Dashboard = ({ user }) => {
   const [errorMessage, setErrorMessage] = useState("");
 
 
-  useEffect(() => {
-    const fetchCars = async () => {
-      if (!user || !user.id) return;
-      setErrorMessage("");
-
-      try {
-       
-        const maxRetries = 3;
-        for (let attempt = 0; attempt < maxRetries; attempt++) {
-          const response = await fetch(`${API_BASE_URL}/cars/${user.id}`);
-          if (response.ok) {
-            const cars = await response.json();
-            setMyCars(cars);
-
-            
-            if (cars.length > 0 && !activeCarId) {
-             
-              setActiveCarId(String(cars[0]._id));
-            }
-            return; 
-          }
-          if (attempt < maxRetries - 1) {
-            const delay = Math.pow(2, attempt) * 1000;
-            await new Promise((resolve) => setTimeout(resolve, delay));
-          } else {
-            throw new Error("Failed to fetch cars after multiple retries.");
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching cars:", error);
-        setErrorMessage(
-          "Could not load your garage. Please check the server connection."
-        );
-      }
-    };
-    fetchCars();
-  }, [user]);
-
+ 
   const addCar = async (carData) => {
     setErrorMessage("");
     if (!user || !user.id) {
