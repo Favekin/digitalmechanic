@@ -19,7 +19,7 @@ import {
   LogOut,
 } from "lucide-react";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/$/, "");
 const CAR_BRANDS = ["Mercedes", "Toyota", "BMW", "Honda", "Lexus"];
 
 const MOCK_EXPERTS = [
@@ -698,7 +698,7 @@ const Dashboard = ({ user }) => {
 
     try {
       // The backend expects userId and car details
-      const response = await fetch(`${API_BASE_URL}/cars`, {
+      const response = await fetch(`${API_BASE_URL}/api/cars`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...carData, userId: user.id }),
@@ -929,7 +929,7 @@ const App = () => {
     
       const maxRetries = 3;
       for (let attempt = 0; attempt < maxRetries; attempt++) {
-        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(dataToSend),
