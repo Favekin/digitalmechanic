@@ -20,11 +20,7 @@ import {
   LogOut,
 } from "lucide-react";
 
-/*
-  NOTE:
-  Ensure your VITE_API_URL in .env points to the Render server root,
-  e.g. VITE_API_URL=https://server-1-601m.onrender.com
-*/
+
 const API_BASE_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 const CAR_BRANDS = ["Mercedes", "Toyota", "BMW", "Honda", "Lexus"];
 
@@ -51,24 +47,21 @@ const MAINTENANCE_SCHEDULE = [
   { miles: 50000, task: "Transmission Fluid Check", urgent: true },
 ];
 
-/* ----------------------
-   Small utility helpers
-   ---------------------- */
+
+
 async function safeParseJson(response) {
-  // returns { ok, status, data/text }
+ 
   const text = await response.text();
   try {
     const json = JSON.parse(text || "{}");
     return { ok: response.ok, status: response.status, data: json };
   } catch {
-    // not JSON
+   
     return { ok: response.ok, status: response.status, data: text };
   }
 }
 
-/* ----------------------
-   UI Subcomponents (kept same)
-   ---------------------- */
+
 
 const Navbar = ({ page, setPage, user, logout, toggleMenu, isMenuOpen }) => (
   <nav className="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
@@ -288,7 +281,7 @@ const AIChat = () => {
     const question = input;
     setInput("");
 
-    // Placeholder bot response (you can replace with real API later)
+    //ai simulation, note that i haven't implememted Openai
     setTimeout(() => {
       let response = "That sounds like something you should check soon. Based on your car model, I'd recommend checking the owner's manual for specific torque specs.";
       if (question.toLowerCase().includes("oil")) response = "For your vehicle, regular oil changes are critical. I recommend checking the lubricant tab for specific viscosity.";
@@ -316,9 +309,7 @@ const AIChat = () => {
   );
 };
 
-/* ----------------------
-   CarManager simplified
-   ---------------------- */
+//car manager
 const CarManager = ({ myCars, addCar, activeCarId, setActiveCarId }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [newCar, setNewCar] = useState({ make: "Toyota", model: "", year: "" });
@@ -371,16 +362,14 @@ const CarManager = ({ myCars, addCar, activeCarId, setActiveCarId }) => {
   );
 };
 
-/* ----------------------
-   Dashboard now receives user and handles fetch/add cars
-   ---------------------- */
+// dashboard fetches cars
 const Dashboard = ({ user }) => {
   const [myCars, setMyCars] = useState([]);
   const [activeCarId, setActiveCarId] = useState(null);
   const [activeTab, setActiveTab] = useState("lubricants");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Fetch cars for the user
+  
   const fetchCars = async (userId) => {
     setErrorMessage("");
     if (!userId) return;
@@ -392,7 +381,7 @@ const Dashboard = ({ user }) => {
         console.warn("Fetch cars error:", parsed.data);
         return;
       }
-      // Make sure IDs are strings
+      
       const cars = Array.isArray(parsed.data) ? parsed.data.map(c => ({ ...c, _id: String(c._id) })) : [];
       setMyCars(cars);
       if (cars.length > 0 && !activeCarId) setActiveCarId(String(cars[0]._id));
@@ -404,7 +393,7 @@ const Dashboard = ({ user }) => {
 
   useEffect(() => {
     if (user && user.id) fetchCars(user.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [user]);
 
   const addCar = async (carData) => {
@@ -545,23 +534,21 @@ const Dashboard = ({ user }) => {
   );
 };
 
-/* ----------------------
-   Main App - session persistence + routing
-   ---------------------- */
+// Main app
 const App = () => {
   const [page, setPage] = useState("landing");
   const [user, setUser] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authError, setAuthError] = useState("");
 
-  // Rehydrate user from localStorage on mount
+  
   useEffect(() => {
     try {
       const raw = localStorage.getItem("dm_user");
       if (raw) {
         const parsed = JSON.parse(raw);
         setUser(parsed);
-        // if current page is landing or auth, send to dashboard
+        
         setPage((p) => (p === "landing" || p === "auth") ? "dashboard" : p);
       }
     } catch (err) {
@@ -569,12 +556,12 @@ const App = () => {
     }
   }, []);
 
-  // Redirect to auth if user is null but page is dashboard
+
   useEffect(() => {
     if (page === "dashboard" && !user) setPage("auth");
   }, [page, user]);
 
-  // login will handle both sign-in and register (your server does this)
+  // login/signin handler
   const login = async (userData, isLoginAttempt) => {
     setAuthError("");
     try {
@@ -587,12 +574,12 @@ const App = () => {
 
       const parsed = await safeParseJson(resp);
       if (!parsed.ok) {
-        // server returned error (text or JSON)
+        
         const msg = (parsed.data && parsed.data.message) ? parsed.data.message : (typeof parsed.data === "string" ? parsed.data : `Login failed (${parsed.status})`);
         throw new Error(msg);
       }
 
-      // server returns { user: { _id, name, email } } in your server.js
+      
       const serverUser = parsed.data.user || parsed.data;
       const userObj = { ...serverUser, id: String(serverUser._id || serverUser.id) };
       setUser(userObj);
